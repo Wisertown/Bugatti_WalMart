@@ -1,0 +1,20 @@
+<h1>Checkout!</h1>
+<table border="1px">
+	<thead>
+		<tr>
+			<th>Title</th>
+			<th>Price</th>
+			<th>Total Number of cars</th>
+			<th>Price per Car</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="product in checkoutsCtrl.cart | filter: filter_products">
+			<td ng-bind="product.title"></td>
+			<td ng-bind="product.price"></td>
+			<td ng-bind="product.qty"></td>
+			<td ng-bind="product.qty*product.price"></td>
+		</tr>
+	</tbody>
+</table>
+Total Price:<div ng-bind="checkoutsCtrl.sum | currency: symbol"></div>

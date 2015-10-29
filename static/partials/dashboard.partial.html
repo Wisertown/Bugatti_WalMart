@@ -1,0 +1,23 @@
+<h1>Dashboard</h1>
+<label for="filer">Search for items</label>
+<input type="text" ng-model="filter_products">
+<table border="1px">
+	<thead>
+		<tr>
+			<th>Title</th>
+			<th>Price</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="product in dashboardsCtrl.products | filter: filter_products" ng-init="product.qty = 1">
+			<td ng-bind="product.title">x</td>
+			<td ng-bind="product.price">x</td>
+			<td>
+				<input type="number" ng-model="product.qty">
+				<button ng-click="dashboardsCtrl.addToCart(product, product.qty)">Add</button>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<a href="#/checkout">CHECKOUT</a>

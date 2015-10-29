@@ -1,0 +1,12 @@
+<h1>Login Partial</h1>
+<a href="#/login">login</a>
+<a href="#/registration">registration</a>
+<h3 ng-bind="sessionsCtrl.error"></h3>
+<br>
+<form>
+	<label for="email">Email:</label>
+	<input type="text" ng-model='sessionsCtrl.user.email'>
+	<label for="password">Password:</label>
+	<input type="password" ng-model='sessionsCtrl.user.password'>
+	<input type="submit" ng-click='sessionsCtrl.create(sessionsCtrl.user)'>
+</form>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+	<meta charset="UTF-8">
+	<title>Index</title>
+	<script type="text/javascript" src="js/lib/angular.js"></script>
+	<script type="text/javascript" src="js/lib/angular-routes.js"></script>
+	<script type="text/javascript">
+	var myAppObject = angular.module("myApp", ['ngRoute']);
+	
+	// Angular Partial routes
+	myAppObject.config(function($routeProvider){
+		$routeProvider
+		.when('/', {
+			redirectTo: '/login'
+		})
+		.when('/login', {
+			templateUrl: 'partials/login.partial.html',
+			controller: 'SessionsController',
+			controllerAs: 'sessionsCtrl'
+		})
+		.when('/registration', {
+			templateUrl: 'partials/registration.partial.html',
+			controller: 'UsersController',
+			controllerAs: 'usersCtrl' 
+		})
+		.when('/dashboard', {
+			templateUrl: 'partials/dashboard.partial.html',
+			controller: 'DashboardsController',
+			controllerAs: 'dashboardsCtrl'
+		})
+		.when('/checkout', {
+			templateUrl: 'partials/checkout.partial.html',
+			controller: 'CheckoutsController',
+			controllerAs: 'checkoutsCtrl'
+		})
+		.otherwise({
+			redirectTo: '/'
+		})
+	})
+	myAppObject.controller('SessionsController', function(SessionsFactory){
+		var _this = this;
+		this.create = function(user){
+			_this.error = {};
+			console.log(user);
+			if(user){
+				SessionsFactory.create(user, function(user){
+					if(user.error){_this.error = user.error}
+				})
+			}
+		}
+	})
+	myAppObject.controller('UsersController', function(UserFactory){
+		var _this = this;
+		this.create = function(newUser){
+			_this.errors = {};
+			if(newUser){
+				UserFactory.create(newUser, function(errors){
+					console.log("Called back from UserFactory", newUser)
+					console.log("$$$$", errors)
+					_this.errors = errors;
+				})
+			}
+		}
+	})
+	myAppObject.factory('UserFactory', function($http, $location){
+		var factory = {
+			create: function(newUser, callback){
+				$http.post('/users', newUser).success(function(response){
+					if(response.errors){
+						callback(response.errors);
+					}
+					else { 
+						$location.path('/login')
+						}
+				})
+				console.log("user: ", newUser)
+			}
+		}
+		return factory;
+	})
+
+	myAppObject.factory('SessionsFactory', function($http, $location){
+		var logged_in_user;
+		var factory = {
+			create: function(user, callback){
+				console.log("made it here!")
+				$http.post('/sessions', user).success(function(response){
+					if(response){
+						logged_in_user = response;
+						$location.path('/dashboard')//changes the users page to dashboard after logging in. injected with the http request above.
+					} else {
+						callback({error:"Invalid Credentials"})
+					}
+					callback(response);
+				})
+			},
+			authenticate: function(){
+				$http.get('/authenticate').success(function(response){
+					if(!logged_in_user){$location.path('/login'); 
+					}
+				});
+			}
+		}
+		return factory;
+	})
+	myAppObject.factory('ProductFactory', function($http){
+		var factory = {
+			getAll: function(callback){
+				$http.get('/products').success(function(products){
+					callback(products);
+				})
+			}
+		}
+		return factory;
+	})
+	myAppObject.controller('DashboardsController', function(SessionsFactory, ProductFactory, CartFactory){
+		var _this = this;
+		 console.log("DashboardsController loaded....");
+		 SessionsFactory.authenticate();
+		 ProductFactory.getAll(function(products){
+		 	_this.products = products;
+		 })
+		 this.addToCart = function(product){
+		 	console.log("PRODUCT", product)
+		 	var my_product = JSON.parse(JSON.stringify(product));
+		 	console.log("MY PRODUCT", my_product)
+			CartFactory.add(my_product);
+		 }
+	})
+
+	myAppObject.factory('CartFactory', function(){
+		var cart = [];
+		var factory = {
+			add: function(product){
+				var found = false;
+				for(index in cart){
+					if(cart[index]['_id'] == product._id){
+						cart[index]['qty'] += product.qty
+						found = true;
+					}
+
+				}
+				if(!found){
+					cart.push(product);
+				}
+				console.log("CART: ", cart);
+			},
+			remove: function(){
+
+			},
+			update: function(){
+
+			},
+			retrieve: function(){
+				return cart;
+			}
+		}
+		return factory;
+	})
+
+	myAppObject.controller('CheckoutsController', function(SessionsFactory, CartFactory){
+		SessionsFactory.authenticate();
+		this.cart = CartFactory.retrieve();
+		this.sum = 0;
+		for( index in this.cart){
+			this.sum += this.cart[index].qty * this.cart[index].price;
+		}
+	})
+
+	</script>
+</head>
+<body>
+	<h1>Index</h1>
+	<div ng-view></div>
+</body>
+</html>

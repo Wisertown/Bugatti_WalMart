@@ -1,0 +1,17 @@
+<h1>Registration Partial</h1>
+	<a href="#/login">login</a>
+	<a href="#/registration">registration</a>
+<li ng-repeat="error in usersCtrl.errors">
+	{{error.message}}
+</li>
+<form>
+	<label for="first_name">First Name:</label>
+	<input type="text" ng-model="usersCtrl.newUser.first_name">
+	<label for="last_name">Last Name:</label>
+	<input type="text" ng-model="usersCtrl.newUser.last_name">
+	<label for="email">Email:</label>
+	<input type="text" ng-model="usersCtrl.newUser.email">
+	<label for="password">Password:</label>
+	<input type="password" ng-model="usersCtrl.newUser.password">
+	<input type="submit" ng-click="usersCtrl.create(usersCtrl.newUser)">
+</form>
